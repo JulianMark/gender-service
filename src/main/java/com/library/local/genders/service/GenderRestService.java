@@ -65,7 +65,7 @@ public class GenderRestService {
     }
 
     @PostMapping(
-            value = "/books/{idGender}/gender",
+            value = "/books/gender/{idGender}",
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Actualizar un género de los libros")
     @ApiResponses({
@@ -74,9 +74,11 @@ public class GenderRestService {
             @ApiResponse(code = 400, message = "Argumentos inválidos", response = GenderChangeResponse.class),
             @ApiResponse(code = 500, message = "Error inesperado del servicio web", response = GenderChangeResponse.class),
     })
-    public ResponseEntity<GenderChangeResponse> updateGenderDescription(@RequestBody GenderChangeRequest genderChangeRequest,
-                                                                        @PathVariable Integer idGender) {
+    public ResponseEntity<GenderChangeResponse> updateGenderDescription(
+            @RequestBody GenderChangeRequest genderChangeRequest,
+            @PathVariable Integer idGender) {
         try {
+            validateIdGenderNumber(idGender);
             GenderChangeDTO genderChangeDTO = genderChangeDTOBuilder.apply(genderChangeRequest,idGender);
             try {
                 genderMapper.updateGenderDescription(genderChangeDTO);
@@ -124,6 +126,16 @@ public class GenderRestService {
                     genderAddRequest.getDescription(), ex);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new GenderAddResponse(ex.getMessage()));
         }
+    }
+
+    private void validateIdGenderNumber(Integer idGender){
+        if (idGender == null){
+            throw new IllegalArgumentException("El id del género no puede ser nulo");
+        }
+        if (idGender.toString().isEmpty()){
+            throw new IllegalArgumentException("El id del género no puede estar vacío");
+        }
+
     }
 
 }
